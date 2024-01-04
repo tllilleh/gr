@@ -1,9 +1,10 @@
+import email.utils
 import feedparser
 import math
 import os
+import random
 import slugify
 import urllib.request
-import email.utils
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 covers_path = "./covers/"
@@ -19,6 +20,8 @@ force_cols = None
 force_rows = None
 # force_cols = 12
 # force_rows = 6
+rotation = 0
+rotation_pm = 0
 
 
 def make_collage(covers, title):
@@ -29,7 +32,7 @@ def make_collage(covers, title):
     cover_images = []
 
     for cover in covers:
-        image = Image.open(cover).convert("RGB")
+        image = Image.open(cover).convert("RGBA")
         cover_images.append(image)
         max_width = max(max_width, image.width)
         max_height = max(max_height, image.height)
@@ -87,13 +90,15 @@ def make_collage(covers, title):
     # collage_image_aspect_ratio = collage_image_width / collage_image_height
     # print("w: %d, h: %d, a: %f, ta: %f" % (collage_image_width, collage_image_height, collage_image_aspect_ratio, collage_aspect_ratio))
 
-    collage = Image.new("RGB", (collage_image_width, collage_image_height), color=background_color)
+    collage = Image.new("RGBA", (collage_image_width, collage_image_height), color=background_color)
 
     x = border - col_gap
     y = border - row_gap
     for cover_image in cover_images:
         cover_image = ImageOps.pad(cover_image, (width, height), color=background_color)
-        collage.paste(cover_image, (x + col_gap, y + row_gap))
+        cover_rotation = random.randint(rotation - rotation_pm, rotation + rotation_pm)
+        cover_image = cover_image.rotate(cover_rotation, expand=1)
+        collage.paste(cover_image, (x + col_gap, y + row_gap), mask=cover_image)
         x += x_step
         if x >= collage.width - border:
             x = border - col_gap
@@ -152,4 +157,4 @@ if __name__ == '__main__':
 
     filename = "collage-%s-%dx%d.jpg" % (slugify.slugify(title), collage_width, collage_height)
     print("Saving collage:", filename)
-    collage.save(filename)
+    collage.convert("RGB").save(filename)
