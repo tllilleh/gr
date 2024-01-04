@@ -143,4 +143,6 @@ def get_covers():
 if __name__ == '__main__':
     covers = get_covers()
     collage = make_collage(covers)
-    collage.save("collage-%s-%d-%d.jpg" % (shelf, collage_width, collage_height))
+    filename = "collage-%s-%d-%d.jpg" % (shelf, collage_width, collage_height)
+    print("Saving collage:", filename)
+    collage.save(filename)
