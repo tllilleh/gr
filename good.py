@@ -13,6 +13,8 @@ collage_height = 13
 collage_aspect_ratio = collage_width / collage_height
 force_cols = None
 force_rows = None
+background_color = (255, 255, 255)
+title_color = (0, 0, 0)
 # force_cols = 12
 # force_rows = 6
 
@@ -84,12 +86,12 @@ def make_grid():
     # collage_image_aspect_ratio = collage_image_width / collage_image_height
     # print("w: %d, h: %d, a: %f, ta: %f" % (collage_image_width, collage_image_height, collage_image_aspect_ratio, collage_aspect_ratio))
 
-    collage = Image.new("RGB", (collage_image_width, collage_image_height), color=(0, 0, 0))
+    collage = Image.new("RGB", (collage_image_width, collage_image_height), color=background_color)
 
     x = x_border
     y = y_border
     for cover_image in cover_images:
-        cover_image = ImageOps.pad(cover_image, (width, height))
+        cover_image = ImageOps.pad(cover_image, (width, height), color=background_color)
         collage.paste(cover_image, (x + x_border, y + y_border))
         x += x_step
         if x >= collage.width - (2 * x_border):
@@ -104,7 +106,7 @@ def make_grid():
     text_x = collage_image_width - (2 * x_border + text_width)
     text_y = collage_image_height - (2 * y_border + text_height)
 
-    draw.text((text_x, text_y), title, font=font)
+    draw.text((text_x, text_y), title, font=font, fill=title_color)
 
     collage.save("collage-%s-%d-%d.jpg" % (shelf, collage_width, collage_height))
 
