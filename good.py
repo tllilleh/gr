@@ -3,6 +3,7 @@ import math
 import os.path
 import urllib.request
 import email.utils
+from PIL import Image, ImageOps
 
 covers_path = "covers"
 shelf = "2023"
@@ -16,7 +17,6 @@ covers = []
 
 def make_grid():
     print("Creating grid...")
-    from PIL import Image, ImageOps
 
     max_width = 0
     max_height = 0
@@ -58,7 +58,7 @@ def make_grid():
     collage_image_height = (best_rows * y_step) + (2 * y_border)
     collage_image_aspect_ratio = collage_image_width / collage_image_height
 
-    print("w: %d, h: %d, a: %f, ta: %f" % (collage_image_width, collage_image_height, collage_image_aspect_ratio, collage_aspect_ratio))
+    # print("w: %d, h: %d, a: %f, ta: %f" % (collage_image_width, collage_image_height, collage_image_aspect_ratio, collage_aspect_ratio))
 
     if collage_image_aspect_ratio < collage_aspect_ratio:
         target_width = collage_image_height * collage_aspect_ratio
@@ -71,8 +71,8 @@ def make_grid():
         y_step = height + (2 * y_border)
         collage_image_height = (best_rows * y_step) + (2 * y_border)
 
-    collage_image_aspect_ratio = collage_image_width / collage_image_height
-    print("w: %d, h: %d, a: %f, ta: %f" % (collage_image_width, collage_image_height, collage_image_aspect_ratio, collage_aspect_ratio))
+    # collage_image_aspect_ratio = collage_image_width / collage_image_height
+    # print("w: %d, h: %d, a: %f, ta: %f" % (collage_image_width, collage_image_height, collage_image_aspect_ratio, collage_aspect_ratio))
 
     collage = Image.new("RGB", (collage_image_width, collage_image_height), color=(0, 0, 0))
 
