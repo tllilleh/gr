@@ -18,10 +18,8 @@ force_rows = None
 # force_cols = 12
 # force_rows = 6
 
-covers = []
 
-
-def make_grid():
+def make_grid(covers):
     print("Creating grid...")
 
     max_width = 0
@@ -109,7 +107,7 @@ def make_grid():
 
     draw.text((text_x, text_y), title, font=font, fill=title_color)
 
-    collage.save("collage-%s-%d-%d.jpg" % (shelf, collage_width, collage_height))
+    return collage
 
 
 def get_covers():
@@ -134,10 +132,14 @@ def get_covers():
 
     covers_raw.sort(key=lambda tup: tup[0])  # sorts in place
 
+    covers = []
     for date, id in covers_raw:
         covers.append(id)
 
+    return covers
+
 
 if __name__ == '__main__':
-    get_covers()
-    make_grid()
+    covers = get_covers()
+    grid = make_grid(covers)
+    grid.save("collage-%s-%d-%d.jpg" % (shelf, collage_width, collage_height))
