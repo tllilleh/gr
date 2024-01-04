@@ -3,7 +3,7 @@ import math
 import os.path
 import urllib.request
 import email.utils
-from PIL import Image, ImageOps
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 covers_path = "covers"
 shelf = "2023"
@@ -11,6 +11,10 @@ goodreads_url = "https://www.goodreads.com/review/list_rss/118844638?key=gidMdmA
 collage_width = 19
 collage_height = 13
 collage_aspect_ratio = collage_width / collage_height
+force_cols = None
+force_rows = None
+# force_cols = 12
+# force_rows = 6
 
 covers = []
 
@@ -30,8 +34,8 @@ def make_grid():
 
     width = max_width
     height = max_height
-    x_border = int(max_width * 0.05)
-    y_border = int(max_width * 0.05)
+    x_border = int(max_width * 0.04)
+    y_border = int(max_width * 0.04)
     x_step = width + (2 * x_border)
     y_step = height + (2 * y_border)
 
@@ -53,6 +57,12 @@ def make_grid():
             best_ratio = ratio_ratio
             best_rows = rows
             best_cols = cols
+
+    if force_cols:
+        best_cols = force_cols
+
+    if force_rows:
+        best_rows = force_rows
 
     collage_image_width = (best_cols * x_step) + (2 * x_border)
     collage_image_height = (best_rows * y_step) + (2 * y_border)
@@ -85,6 +95,16 @@ def make_grid():
         if x >= collage.width - (2 * x_border):
             x = x_border
             y += y_step
+
+    draw = ImageDraw.Draw(collage)
+    font = ImageFont.truetype('DejaVuSerif.ttf', 65)
+    title = shelf
+    _, _, text_width, text_height = font.getbbox(title)
+
+    text_x = collage_image_width - (2 * x_border + text_width)
+    text_y = collage_image_height - (2 * y_border + text_height)
+
+    draw.text((text_x, text_y), title, font=font)
 
     collage.save("collage-%s-%d-%d.jpg" % (shelf, collage_width, collage_height))
 
