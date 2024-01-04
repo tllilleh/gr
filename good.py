@@ -11,10 +11,10 @@ goodreads_url = "https://www.goodreads.com/review/list_rss/118844638?key=gidMdmA
 collage_width = 19
 collage_height = 13
 collage_aspect_ratio = collage_width / collage_height
-force_cols = None
-force_rows = None
 background_color = (255, 255, 255)
 title_color = (0, 0, 0)
+force_cols = None
+force_rows = None
 # force_cols = 12
 # force_rows = 6
 
@@ -36,10 +36,11 @@ def make_grid():
 
     width = max_width
     height = max_height
-    x_border = int(max_width * 0.04)
-    y_border = int(max_width * 0.04)
-    x_step = width + (2 * x_border)
-    y_step = height + (2 * y_border)
+    col_gap = int(max_width * 0.04)
+    row_gap = int(max_width * 0.04)
+    border = 150
+    x_step = width + (2 * col_gap)
+    y_step = height + (2 * row_gap)
 
     best_rows = 0
     best_cols = 0
@@ -47,8 +48,8 @@ def make_grid():
 
     for cols in range(1, len(covers)):
         rows = int(math.ceil(len(covers) / cols))
-        local_width = (x_step * cols) + (2 * x_border)
-        local_height = (y_step * rows) + (2 * y_border)
+        local_width = (x_step * cols) + (2 * border) - (2 * col_gap)
+        local_height = (y_step * rows) + (2 * border) - (2 * row_gap)
         local_aspect_ratio = local_width / local_height
         if local_aspect_ratio > collage_aspect_ratio:
             ratio_ratio = collage_aspect_ratio / local_aspect_ratio
@@ -66,36 +67,36 @@ def make_grid():
     if force_rows:
         best_rows = force_rows
 
-    collage_image_width = (best_cols * x_step) + (2 * x_border)
-    collage_image_height = (best_rows * y_step) + (2 * y_border)
+    collage_image_width = (best_cols * x_step) + (2 * border) - (2 * col_gap)
+    collage_image_height = (best_rows * y_step) + (2 * border) - (2 * row_gap)
     collage_image_aspect_ratio = collage_image_width / collage_image_height
 
     # print("w: %d, h: %d, a: %f, ta: %f" % (collage_image_width, collage_image_height, collage_image_aspect_ratio, collage_aspect_ratio))
 
     if collage_image_aspect_ratio < collage_aspect_ratio:
         target_width = collage_image_height * collage_aspect_ratio
-        x_border += int((target_width - collage_image_width) / (best_cols + 1) / 2)
-        x_step = width + (2 * x_border)
-        collage_image_width = (best_cols * x_step) + (2 * x_border)
+        col_gap += int((target_width - collage_image_width) / (best_cols - 1) / 2)
+        x_step = width + (2 * col_gap)
+        collage_image_width = (best_cols * x_step) + (2 * border) - (2 * col_gap)
     else:
         target_height = collage_image_width / collage_aspect_ratio
-        y_border += int((target_height - collage_image_height) / (best_rows + 1) / 2)
-        y_step = height + (2 * y_border)
-        collage_image_height = (best_rows * y_step) + (2 * y_border)
+        row_gap += int((target_height - collage_image_height) / (best_rows - 1) / 2)
+        y_step = height + (2 * row_gap)
+        collage_image_height = (best_rows * y_step) + (2 * border) - (2 * row_gap)
 
     # collage_image_aspect_ratio = collage_image_width / collage_image_height
     # print("w: %d, h: %d, a: %f, ta: %f" % (collage_image_width, collage_image_height, collage_image_aspect_ratio, collage_aspect_ratio))
 
     collage = Image.new("RGB", (collage_image_width, collage_image_height), color=background_color)
 
-    x = x_border
-    y = y_border
+    x = border - col_gap
+    y = border - row_gap
     for cover_image in cover_images:
         cover_image = ImageOps.pad(cover_image, (width, height), color=background_color)
-        collage.paste(cover_image, (x + x_border, y + y_border))
+        collage.paste(cover_image, (x + col_gap, y + row_gap))
         x += x_step
-        if x >= collage.width - (2 * x_border):
-            x = x_border
+        if x >= collage.width - border:
+            x = border - col_gap
             y += y_step
 
     draw = ImageDraw.Draw(collage)
@@ -103,8 +104,8 @@ def make_grid():
     title = shelf
     _, _, text_width, text_height = font.getbbox(title)
 
-    text_x = collage_image_width - (2 * x_border + text_width)
-    text_y = collage_image_height - (2 * y_border + text_height)
+    text_x = collage_image_width - (border + text_width)
+    text_y = collage_image_height - (border + text_height)
 
     draw.text((text_x, text_y), title, font=font, fill=title_color)
 
