@@ -1,13 +1,15 @@
 import feedparser
 import math
 import os
+import slugify
 import urllib.request
 import email.utils
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 covers_path = "./covers/"
-shelf = "2023"
-goodreads_url = "https://www.goodreads.com/review/list_rss/118844638?key=gidMdmAKYyxrcdTjUrRUNdHwG0ulEJ_bC9AFFOJrHKTR2R3E&shelf=%s" % (shelf)
+# shelves = ["2020", "2021", "2022", "2023"]
+shelves = ["2023"]
+goodreads_url_fmt = "https://www.goodreads.com/review/list_rss/118844638?key=gidMdmAKYyxrcdTjUrRUNdHwG0ulEJ_bC9AFFOJrHKTR2R3E&shelf=%s"
 collage_width = 19
 collage_height = 13
 collage_aspect_ratio = collage_width / collage_height
@@ -19,7 +21,7 @@ force_rows = None
 # force_rows = 6
 
 
-def make_collage(covers):
+def make_collage(covers, title):
     print("Creating collage...")
 
     max_width = 0
@@ -99,7 +101,6 @@ def make_collage(covers):
 
     draw = ImageDraw.Draw(collage)
     font = ImageFont.truetype('DejaVuSerif.ttf', 65)
-    title = shelf
     _, _, text_width, text_height = font.getbbox(title)
 
     text_x = collage_image_width - (border + text_width)
@@ -110,10 +111,10 @@ def make_collage(covers):
     return collage
 
 
-def get_covers():
-    print("Getting covers...")
+def get_covers(shelf):
+    print("Getting covers for self %s..." % (shelf))
     os.makedirs(covers_path, exist_ok=True)
-    feed = feedparser.parse(goodreads_url)
+    feed = feedparser.parse(goodreads_url_fmt % (shelf))
     covers_raw = []
 
     for book in feed.entries:
@@ -141,8 +142,14 @@ def get_covers():
 
 
 if __name__ == '__main__':
-    covers = get_covers()
-    collage = make_collage(covers)
-    filename = "collage-%s-%d-%d.jpg" % (shelf, collage_width, collage_height)
+    covers = []
+    for shelf in shelves:
+        shelf_covers = get_covers(shelf)
+        covers += shelf_covers
+
+    title = ", ".join(shelves)
+    collage = make_collage(covers, title)
+
+    filename = "collage-%s-%dx%d.jpg" % (slugify.slugify(title), collage_width, collage_height)
     print("Saving collage:", filename)
     collage.save(filename)
