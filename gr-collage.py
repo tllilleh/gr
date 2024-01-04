@@ -19,8 +19,8 @@ force_rows = None
 # force_rows = 6
 
 
-def make_grid(covers):
-    print("Creating grid...")
+def make_collage(covers):
+    print("Creating collage...")
 
     max_width = 0
     max_height = 0
@@ -141,5 +141,5 @@ def get_covers():
 
 if __name__ == '__main__':
     covers = get_covers()
-    grid = make_grid(covers)
-    grid.save("collage-%s-%d-%d.jpg" % (shelf, collage_width, collage_height))
+    collage = make_collage(covers)
+    collage.save("collage-%s-%d-%d.jpg" % (shelf, collage_width, collage_height))
