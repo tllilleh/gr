@@ -1,11 +1,11 @@
 import feedparser
 import math
-import os.path
+import os
 import urllib.request
 import email.utils
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-covers_path = "covers"
+covers_path = "./covers/"
 shelf = "2023"
 goodreads_url = "https://www.goodreads.com/review/list_rss/118844638?key=gidMdmAKYyxrcdTjUrRUNdHwG0ulEJ_bC9AFFOJrHKTR2R3E&shelf=%s" % (shelf)
 collage_width = 19
@@ -112,6 +112,7 @@ def make_collage(covers):
 
 def get_covers():
     print("Getting covers...")
+    os.makedirs(covers_path, exist_ok=True)
     feed = feedparser.parse(goodreads_url)
     covers_raw = []
 
@@ -120,7 +121,7 @@ def get_covers():
         read_date = email.utils.parsedate_to_datetime(book.user_read_at)
         # print("Title: ", book.title)
         # print("Read: ", read_date)
-        cover_filename = "%s/%s" % (covers_path, book.book_id)
+        cover_filename = os.path.join(covers_path, book.book_id)
 
         if os.path.exists(cover_filename):
             # print("  using cached cover image")
