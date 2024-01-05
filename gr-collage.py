@@ -13,6 +13,7 @@ covers_path = "./covers/"
 goodreads_url_fmt = "https://www.goodreads.com/review/list_rss/118844638?key=gidMdmAKYyxrcdTjUrRUNdHwG0ulEJ_bC9AFFOJrHKTR2R3E&shelf=%s"
 
 shelves = []
+resize_collage = True
 collage_width = 1920
 collage_height = 1080
 collage_aspect_ratio = collage_width / collage_height
@@ -22,7 +23,6 @@ force_cols = None
 force_rows = None
 rotation = 0
 rotation_pm = 0
-resize_collage = True
 
 
 def make_collage(covers, title):
@@ -155,7 +155,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--shelf", type=str, nargs='+', help="Shelf(s) to include in the collage")
     parser.add_argument("--size", type=str, help="Size of collage in pixels WxH, e.g.: 1920x1080")
-    parser.add_argument("--aspect", type=str, help="Aspect ratio of collage in W:H, e.g.: 16:9, actual size will be determined by size of cover images")
+    parser.add_argument("--aspect", type=str, help="Aspect ratio of collage in W:H, e.g.: 16:9, 8.5:11, actual size will be determined by size of cover images")
     parser.add_argument("--rows", type=int, help="Force collage to have given number of rows.")
     parser.add_argument("--cols", type=int, help="Force collage to have given number of columns.")
     parser.add_argument("--rotation", type=int, help="Rotation of each cover in degrees, w.g.: 10.")
@@ -171,10 +171,12 @@ if __name__ == '__main__':
 
     if args.size:
         collage_width, collage_height = [int(n) for n in args.size.split("x")]
+        collage_aspect_ratio = collage_width / collage_height
         resize_collage = True
 
     if args.aspect:
-        collage_width, collage_height = [int(n) for n in args.aspect.split(":")]
+        w, h = [float(n) for n in args.aspect.split(":")]
+        collage_aspect_ratio = w / h
         resize_collage = False
 
     if args.rows:
