@@ -1,17 +1,19 @@
 import argparse
+import configparser
 import email.utils
 import feedparser
 import math
 import os
 import random
 import slugify
+import urllib.parse
 import urllib.request
 import webcolors
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 covers_path = "./covers/"
-goodreads_url_fmt = "https://www.goodreads.com/review/list_rss/118844638?key=gidMdmAKYyxrcdTjUrRUNdHwG0ulEJ_bC9AFFOJrHKTR2R3E&shelf=%s"
 
+goodreads_url_fmt = None
 shelves = []
 resize_collage = True
 collage_width = 1920
@@ -123,7 +125,13 @@ def make_collage(covers, title):
 def get_covers(shelf):
     print("Getting covers for self %s..." % (shelf))
     os.makedirs(covers_path, exist_ok=True)
-    feed = feedparser.parse(goodreads_url_fmt % (shelf))
+
+    u = urllib.parse.urlparse(goodreads_url_fmt)
+    query = urllib.parse.parse_qs(u.query)
+    query['shelf'] = shelf
+    new_u = urllib.parse.ParseResult(scheme=u.scheme, netloc=u.hostname, path=u.path, params=u.params, query=urllib.parse.urlencode(query, doseq=True), fragment=u.fragment)
+
+    feed = feedparser.parse(new_u.geturl())
     covers_raw = []
 
     for book in feed.entries:
@@ -215,6 +223,28 @@ if __name__ == '__main__':
 
     if type(force_cols) != type(force_rows):
         print("--rows and --cols must be specified together")
+        exit()
+
+    try:
+        config = configparser.RawConfigParser()
+        config.read("config")
+        goodreads_url_fmt = config["Goodreads"]["rss_url"]
+    except:
+        print("""
+Config file required.
+
+Please create a file named 'config' that contains the follwoing:
+
+---
+[Goodreads]
+rss_url = https://www.goodreads.com/review/list_rss/123456789?key=qweryasdf&shelf=%23ALL%23
+---
+
+The URL can be obtained by visiting Goodreads in a web browser.
+- Select "My Books" from the top navigation bar
+- Click on the "RSS Feed" icon at the bottom of the page
+
+""")
         exit()
 
     covers = []
