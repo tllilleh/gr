@@ -23,6 +23,7 @@ force_cols = None
 force_rows = None
 rotation = 0
 rotation_pm = 0
+border = 150
 
 
 def make_collage(covers, title):
@@ -42,7 +43,6 @@ def make_collage(covers, title):
     height = max_height
     col_gap = int(max_width * 0.04)
     row_gap = int(max_width * 0.04)
-    border = 150
     x_step = width + (2 * col_gap)
     y_step = height + (2 * row_gap)
 
@@ -163,47 +163,51 @@ if __name__ == '__main__':
     parser.add_argument("--title-color", type=str, help="Title color, e.g.: black")
     parser.add_argument("--title", type=str, help="Title of collage")
     parser.add_argument("--output", type=str, help="Filename of output image")
+    parser.add_argument("--border", type=int, help="Size of border")
 
     args = parser.parse_args()
 
-    if args.shelf:
+    if args.shelf is not None:
         shelves = args.shelf
 
-    if args.size:
+    if args.size is not None:
         collage_width, collage_height = [int(n) for n in args.size.split("x")]
         collage_aspect_ratio = collage_width / collage_height
         resize_collage = True
 
-    if args.aspect:
+    if args.aspect is not None:
         w, h = [float(n) for n in args.aspect.split(":")]
         collage_aspect_ratio = w / h
         resize_collage = False
 
-    if args.rows:
+    if args.rows is not None:
         force_rows = args.rows
 
-    if args.cols:
+    if args.cols is not None:
         force_cols = args.cols
 
-    if args.rotation:
+    if args.rotation is not None:
         rotation = args.rotation
 
-    if args.background_color:
+    if args.background_color is not None:
         if args.background_color.startswith("#"):
             background_color = webcolors.hex_to_rgb(args.background_color)
         else:
             background_color = webcolors.name_to_rgb(args.background_color)
 
-    if args.title_color:
+    if args.title_color is not None:
         if args.title_color.startswith("#"):
             title_color = webcolors.hex_to_rgb(args.title_color)
         else:
             title_color = webcolors.name_to_rgb(args.title_color)
 
-    if args.title:
+    if args.title is not None:
         title = args.title
     else:
         title = ", ".join(shelves)
+
+    if args.border is not None:
+        border = args.border
 
     if shelves is None or len(shelves) == 0:
         print("Atleast one shelf must be specified")
@@ -220,7 +224,7 @@ if __name__ == '__main__':
 
     collage = make_collage(covers, title)
 
-    if args.output:
+    if args.output is not None:
         filename = args.output
     else:
         filename_base = "collage-%s-%dx%d" % (slugify.slugify(title), collage.width, collage.height)
