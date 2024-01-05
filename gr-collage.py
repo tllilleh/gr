@@ -1,3 +1,4 @@
+import argparse
 import email.utils
 import feedparser
 import math
@@ -5,23 +6,23 @@ import os
 import random
 import slugify
 import urllib.request
+import webcolors
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 covers_path = "./covers/"
-# shelves = ["2020", "2021", "2022", "2023"]
-shelves = ["2023"]
 goodreads_url_fmt = "https://www.goodreads.com/review/list_rss/118844638?key=gidMdmAKYyxrcdTjUrRUNdHwG0ulEJ_bC9AFFOJrHKTR2R3E&shelf=%s"
-collage_width = 19
-collage_height = 13
+
+shelves = []
+collage_width = 1920
+collage_height = 1080
 collage_aspect_ratio = collage_width / collage_height
 background_color = (255, 255, 255)
 title_color = (0, 0, 0)
 force_cols = None
 force_rows = None
-# force_cols = 12
-# force_rows = 6
 rotation = 0
 rotation_pm = 0
+resize_collage = True
 
 
 def make_collage(covers, title):
@@ -113,6 +114,9 @@ def make_collage(covers, title):
 
     draw.text((text_x, text_y), title, font=font, fill=title_color)
 
+    if resize_collage:
+        collage = collage.resize((collage_width, collage_height))
+
     return collage
 
 
@@ -147,14 +151,82 @@ def get_covers(shelf):
 
 
 if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--shelf", type=str, nargs='+', help="Shelf(s) to include in the collage")
+    parser.add_argument("--size", type=str, help="Size of collage in pixels WxH, e.g.: 1920x1080")
+    parser.add_argument("--aspect", type=str, help="Aspect ratio of collage in W:H, e.g.: 16:9, actual size will be determined by size of cover images")
+    parser.add_argument("--rows", type=int, help="Force collage to have given number of rows.")
+    parser.add_argument("--cols", type=int, help="Force collage to have given number of columns.")
+    parser.add_argument("--rotation", type=int, help="Rotation of each cover in degrees, w.g.: 10.")
+    parser.add_argument("--background-color", type=str, help="Background color, e.g.: black")
+    parser.add_argument("--title-color", type=str, help="Title color, e.g.: black")
+    parser.add_argument("--title", type=str, help="Title of collage")
+    parser.add_argument("--output", type=str, help="Filename of output image")
+
+    args = parser.parse_args()
+
+    if args.shelf:
+        shelves = args.shelf
+
+    if args.size:
+        collage_width, collage_height = [int(n) for n in args.size.split("x")]
+        resize_collage = True
+
+    if args.aspect:
+        collage_width, collage_height = [int(n) for n in args.aspect.split(":")]
+        resize_collage = False
+
+    if args.rows:
+        force_rows = args.rows
+
+    if args.cols:
+        force_cols = args.cols
+
+    if args.rotation:
+        rotation = args.rotation
+
+    if args.background_color:
+        if args.background_color.startswith("#"):
+            background_color = webcolors.hex_to_rgb(args.background_color)
+        else:
+            background_color = webcolors.name_to_rgb(args.background_color)
+
+    if args.title_color:
+        if args.title_color.startswith("#"):
+            title_color = webcolors.hex_to_rgb(args.title_color)
+        else:
+            title_color = webcolors.name_to_rgb(args.title_color)
+
+    if args.title:
+        title = args.title
+    else:
+        title = ", ".join(shelves)
+
+    if shelves is None or len(shelves) == 0:
+        print("Atleast one shelf must be specified")
+        exit()
+
+    if type(force_cols) != type(force_rows):
+        print("--rows and --cols must be specified together")
+        exit()
+
     covers = []
     for shelf in shelves:
         shelf_covers = get_covers(shelf)
         covers += shelf_covers
 
-    title = ", ".join(shelves)
     collage = make_collage(covers, title)
 
-    filename = "collage-%s-%dx%d.jpg" % (slugify.slugify(title), collage_width, collage_height)
+    if args.output:
+        filename = args.output
+    else:
+        filename_base = "collage-%s-%dx%d" % (slugify.slugify(title), collage.width, collage.height)
+        filename = filename_base + ".jpg"
+        count = 1
+        while os.path.exists(filename):
+            filename = filename_base + "_" + str(count) + ".jpg"
+            count = count + 1
+
     print("Saving collage:", filename)
     collage.convert("RGB").save(filename)
