@@ -123,7 +123,7 @@ def make_collage(covers, title):
 
 
 def get_covers(shelf):
-    print("Getting covers for self %s..." % (shelf))
+    print("Getting covers for shelf %s..." % (shelf))
     os.makedirs(covers_path, exist_ok=True)
 
     u = urllib.parse.urlparse(goodreads_url_fmt)
