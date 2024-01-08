@@ -2,3 +2,4 @@ feedparser
 Pillow
 python-slugify
 webcolors
+pytz

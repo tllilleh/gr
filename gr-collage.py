@@ -1,9 +1,11 @@
 import argparse
 import configparser
+import datetime
 import email.utils
 import feedparser
 import math
 import os
+import pytz
 import random
 import slugify
 import urllib.parse
@@ -135,9 +137,10 @@ def get_covers(shelf):
     covers_raw = []
 
     for book in feed.entries:
-
         if not book.user_read_at:
-            read_date = ""
+            read_date = datetime.datetime.now()
+            utc=pytz.UTC
+            read_date= utc.localize(read_date)
         else:
             read_date = email.utils.parsedate_to_datetime(book.user_read_at)
         # print("Title: ", book.title)
