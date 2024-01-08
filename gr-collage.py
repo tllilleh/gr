@@ -136,7 +136,10 @@ def get_covers(shelf):
 
     for book in feed.entries:
 
-        read_date = email.utils.parsedate_to_datetime(book.user_read_at)
+        if not book.user_read_at:
+            read_date = ""
+        else:
+            read_date = email.utils.parsedate_to_datetime(book.user_read_at)
         # print("Title: ", book.title)
         # print("Read: ", read_date)
         cover_filename = os.path.join(covers_path, book.book_id)
